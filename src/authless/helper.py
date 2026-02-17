@@ -195,11 +195,13 @@ class OAuth2Helper(AuthBase):
         )
 
     def pick_strategy(self, request):
-        print(request.__dict__)
-        print(request.url)
-
-        print(dir(request))
-        return self.user_strategy if "user" in request.url else self.app_strategy
+        # TODO: strategy selection should be done by the user
+        user_uri_patterns = ("/user",)
+        return (
+            self.user_strategy
+            if any(p in request.url for p in user_uri_patterns)
+            else self.app_strategy
+        )
 
     def __call__(self, request):
         request.headers.update(self.pick_strategy(request).get_header())
