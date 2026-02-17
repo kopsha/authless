@@ -1,6 +1,7 @@
 import hashlib
 from abc import ABC, abstractmethod
 from base64 import b64encode, urlsafe_b64encode
+from collections.abc import Callable
 from secrets import token_urlsafe
 from typing import Any, Protocol
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -10,7 +11,7 @@ from requests.auth import AuthBase
 from .tokens import PersistentTokens
 
 
-class HttpClient(Protocol):
+class AnyHttpClient(Protocol):
     def post(self, url: str, *, data=None, headers=None) -> Any: ...
 
 
@@ -156,13 +157,13 @@ class OAuth2Helper(AuthBase):
         *,
         app: str,
         client_id: str,
-        client_secret: str | None = None,
+        client_secret: str,
         token_endpoint: str,
-        authorization_endpoint: str | None = None,
-        redirect_uri: str | None = None,
-        scope: tuple[str, ...] | None = None,
-        auth_response_handler=None,
-        http_client: HttpClient,
+        authorization_endpoint: str,
+        redirect_uri: str,
+        scope: tuple[str, ...],
+        auth_response_handler: Callable,
+        http_client: AnyHttpClient,
     ):
         self.app = app
         self.client_id = client_id
