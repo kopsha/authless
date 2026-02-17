@@ -7,7 +7,9 @@ authors = [
     { name = "Florin Ciurcanu", email = "florin.ciurcanu@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "requests>=2.32.5",
+]
 
 [project.scripts]
 authless = "authless:main"
@@ -15,4 +17,7 @@ authless = "authless:main"
 [build-system]
 requires = ["uv_build>=0.9.26,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
 
