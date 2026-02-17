@@ -1,0 +1,18 @@
+[project]
+name = "authless"
+version = "0.1.0"
+description = "A Zen OAuth2 helper for requests"
+readme = "README.md"
+authors = [
+    { name = "Florin Ciurcanu", email = "florin.ciurcanu@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+authless = "authless:main"
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
+
