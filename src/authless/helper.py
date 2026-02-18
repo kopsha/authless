@@ -6,6 +6,7 @@ from secrets import token_urlsafe
 from typing import Any, Protocol
 from urllib.parse import parse_qs, urlencode, urlparse
 
+from requests import PreparedRequest
 from requests.auth import AuthBase
 
 from .tokens import PersistentTokens
@@ -194,15 +195,16 @@ class OAuth2Helper(AuthBase):
             http_client=http_client,
         )
 
-    def pick_strategy(self, request):
+    def pick_strategy(self, uri: str):
         # TODO: strategy selection should be done by the user
         user_uri_patterns = ("/user",)
         return (
             self.user_strategy
-            if any(p in request.url for p in user_uri_patterns)
+            if any(p in uri for p in user_uri_patterns)
             else self.app_strategy
         )
 
-    def __call__(self, request):
-        request.headers.update(self.pick_strategy(request).get_header())
+    def __call__(self, request: PreparedRequest):
+        strategy = self.pick_strategy(request.url or "")
+        request.headers.update(strategy.get_header())
         return request
