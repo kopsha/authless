@@ -197,7 +197,7 @@ class OAuth2Helper(AuthBase):
 
     def pick_strategy(self, uri: str):
         # TODO: strategy selection should be done by the user
-        user_uri_patterns = ("/user",)
+        user_uri_patterns = ("/user", "/me")
         return (
             self.user_strategy
             if any(p in uri for p in user_uri_patterns)
