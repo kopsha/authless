@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import InitVar, asdict, dataclass
 from pathlib import Path
 from time import time
@@ -39,7 +40,14 @@ class PersistentTokens:
 
     def write(self, data):
         self._update(data)
-        self.filepath.write_text(json.dumps(asdict(self), indent=4))
+        payload = json.dumps(asdict(self), indent=4)
+        with open(
+            self.filepath,
+            "w",
+            encoding="utf-8",
+            opener=lambda path, flags: os.open(path, flags, 0o600),
+        ) as token_file:
+            token_file.write(payload)
         self.filepath.chmod(0o600)
 
     def is_expired(self, now=None):

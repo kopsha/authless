@@ -1,5 +1,5 @@
 
-# OAuth2Helper
+# authless
 
 `OAuth2Helper` is a small wrapper around the two most common OAuth 2.0 flows:
 
@@ -11,20 +11,28 @@ It plugs directly into `requests.Session` and automatically attaches the correct
 
 This guide shows only what you need to start using it.
 
+```sh
+python -m pip install authless
+```
 
 ## Quickstart
 
 ### Provide a callback handler
 
-This function opens the browser and waits for the redirect to your local server:
+Your application supplies `auth_response_handler(login_url)`. It sends the
+user to the login URL and returns the redirect URL or path, including the full
+query string. The helper validates the OAuth state and exchanges the
+authorization code.
 
 ```python
-def local_auth_callback(login_url: str):
-    # e.g. opens browser and waits for http://localhost:3000/callback
-    ...
+def local_auth_callback(login_url: str) -> str:
+    print(f"Open this URL in your browser: {login_url}")
+    return input("Paste the full callback URL from your browser: ").strip()
 ```
 
-Your OAuth app must have this redirect URI registered.
+Register the same redirect URI with your OAuth provider that you pass to the
+helper. The snippet uses a manual callback for illustration. A web app can
+instead receive the redirect through its own callback route.
 
 
 ### Create the OAuth2Helper instance
@@ -60,7 +68,7 @@ with requests.Session() as session:
 
 On the first request that requires user authentication:
 
-- Your browser opens  
+- Your callback handler directs you to the provider's login page
 - You log in  
 - Tokens are stored locally  
 - Future calls reuse and refresh them automatically  
@@ -79,10 +87,10 @@ based on simple substring matching in the request URL.
 Default:
 
 ```python
-user_uri_patterns = ("/user",)
+user_uri_patterns = ("/user", "/me")
 ```
 
-You can change this by editing `pick_strategy()`.
+You can override `pick_strategy()` in an `OAuth2Helper` subclass.
 
 
 
@@ -100,4 +108,12 @@ the JSON file whenever new token data is written. On startup, the helper loads
 the file if it exists, checks whether the token is expired, and refreshes it when
 needed. This makes the authentication flow run only once—subsequent runs reuse
 the stored tokens.
+
+## TIDAL example
+
+The [repository example](https://github.com/kopsha/authless/blob/main/examples/tidal.py) demonstrates a browser-based OAuth
+flow with a local callback server. From a checkout, install the library with
+`python -m pip install .`, register `http://127.0.0.1:3000/callback` with your
+TIDAL app, and set `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET` in your
+environment. Run `python examples/tidal.py` for a local demonstration.
 

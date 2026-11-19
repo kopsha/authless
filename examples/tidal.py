@@ -5,13 +5,16 @@ from urllib.parse import parse_qs, urlparse
 
 import requests
 
-from .helper import OAuth2Helper
+from authless import OAuth2Helper
 
 
 def local_auth_callback(login_url: str):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             parsed = urlparse(self.path)
+            if parsed.path != "/callback":
+                self._respond("Not found", status=404)
+                return
             params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
             if "error" in params:
                 msg = f"Authorization failed: {params.get('error_description')}"
@@ -23,12 +26,15 @@ def local_auth_callback(login_url: str):
 
         def _respond(self, message, status=200):
             self.send_response(status)
-            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write(f"<html><body><pre>{message}</pre></body></html>".encode())
+            self.wfile.write(message.encode())
 
-    webbrowser.open(login_url)
-    with ThreadingHTTPServer(("", 3000), Handler) as httpd:
+        def log_message(self, format, *args):
+            pass  # Callback URLs can contain authorization codes.
+
+    with ThreadingHTTPServer(("127.0.0.1", 3000), Handler) as httpd:
+        webbrowser.open(login_url)
         print("Waiting for authorization callback...")
         httpd.serve_forever(poll_interval=0.1)
         return httpd._response_path
@@ -40,8 +46,8 @@ def main():
     print("OAuth 2.0 Authorization Flow")
     print("=" * 50)
 
-    CLIENT_ID = environ.get("TIDAL_CLIENT_ID", "test")
-    CLIENT_SECRET = environ.get("TIDAL_CLIENT_SECRET", "secret")
+    CLIENT_ID = environ["TIDAL_CLIENT_ID"]
+    CLIENT_SECRET = environ["TIDAL_CLIENT_SECRET"]
 
     oauth = OAuth2Helper(
         app="token-trial",
@@ -49,7 +55,7 @@ def main():
         client_secret=CLIENT_SECRET,
         token_endpoint="https://auth.tidal.com/v1/oauth2/token",
         authorization_endpoint="https://login.tidal.com/authorize",
-        redirect_uri="http://localhost:3000/callback",
+        redirect_uri="http://127.0.0.1:3000/callback",
         scope=(
             "collection.read",
             "collection.write",
