@@ -3,6 +3,8 @@ name = "authless"
 version = "0.2.0"
 description = "A Zen OAuth2 helper for requests"
 readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [
     { name = "Florin Ciurcanu", email = "florin.ciurcanu@gmail.com" }
 ]
