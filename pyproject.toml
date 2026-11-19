@@ -1,6 +1,6 @@
 [project]
 name = "authless"
-version = "0.2.0"
+version = "0.0.0" # Local build version. pre-release.sh uses the Git tag for releases.
 description = "A Zen OAuth2 helper for requests"
 readme = "README.md"
 license = "BSD-3-Clause"
