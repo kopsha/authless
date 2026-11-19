@@ -30,7 +30,7 @@ Your OAuth app must have this redirect URI registered.
 ### Create the OAuth2Helper instance
 
 ```python
-from helper import OAuth2Helper
+from authless import OAuth2Helper
 import requests
 
 oauth = OAuth2Helper(
